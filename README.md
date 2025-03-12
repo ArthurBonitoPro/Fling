@@ -7,9 +7,12 @@
 
 local ScreenGui = Instance.new("ScreenGui")
 local Frame = Instance.new("Frame")
-local Frame_2 = Instance.new("Frame")
-local TextLabel = Instance.new("TextLabel")
-local ToggleButton = Instance.new("TextButton")
+local UICorner = Instance.new("UICorner")
+local ScrollingFrame = Instance.new("ScrollingFrame")
+local ToolTemplate = Instance.new("TextButton")
+local SelectedToolFrame = Instance.new("Frame")
+local SelectedToolLabel = Instance.new("TextLabel")
+local PickButton = Instance.new("TextButton")
 
 --Properties:
 
@@ -18,94 +21,89 @@ ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 ScreenGui.ResetOnSpawn = false
 
 Frame.Parent = ScreenGui
-Frame.BackgroundColor3 = Color3.fromRGB(34, 34, 34)
+Frame.BackgroundColor3 = Color3.fromRGB(255, 0, 0) -- Cor vermelha
 Frame.BorderColor3 = Color3.fromRGB(0, 0, 0)
 Frame.BorderSizePixel = 0
-Frame.Position = UDim2.new(0.388539821, 0, 0.427821517, 0)
-Frame.Size = UDim2.new(0, 250, 0, 100)
+Frame.Position = UDim2.new(0.3, 0, 0.3, 0)
+Frame.Size = UDim2.new(0, 300, 0, 400)
+Frame.Active = true
+Frame.Draggable = true
 
-Frame_2.Parent = Frame
-Frame_2.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-Frame_2.BorderColor3 = Color3.fromRGB(0, 0, 0)
-Frame_2.BorderSizePixel = 0
-Frame_2.Size = UDim2.new(0, 250, 0, 30)
+UICorner.Parent = Frame
+UICorner.CornerRadius = UDim.new(0, 10)
 
-TextLabel.Parent = Frame_2
-TextLabel.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-TextLabel.BackgroundTransparency = 1.000
-TextLabel.BorderColor3 = Color3.fromRGB(0, 0, 0)
-TextLabel.BorderSizePixel = 0
-TextLabel.Position = UDim2.new(0.1, 0, 0, 0)
-TextLabel.Size = UDim2.new(0, 200, 0, 30)
-TextLabel.Font = Enum.Font.SourceSansBold
-TextLabel.Text = "AUTO DETECT"
-TextLabel.TextColor3 = Color3.fromRGB(0, 255, 0)
-TextLabel.TextSize = 20.000
+ScrollingFrame.Parent = Frame
+ScrollingFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+ScrollingFrame.BorderSizePixel = 0
+ScrollingFrame.Position = UDim2.new(0.05, 0, 0.05, 0)
+ScrollingFrame.Size = UDim2.new(0, 270, 0, 300)
+ScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+ScrollingFrame.ScrollBarThickness = 5
 
-ToggleButton.Parent = Frame
-ToggleButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-ToggleButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
-ToggleButton.BorderSizePixel = 0
-ToggleButton.Position = UDim2.new(0.1, 0, 0.4, 0)
-ToggleButton.Size = UDim2.new(0, 100, 0, 30)
-ToggleButton.Font = Enum.Font.SourceSansBold
-ToggleButton.Text = "LIGAR"
-ToggleButton.TextColor3 = Color3.fromRGB(0, 0, 0)
-ToggleButton.TextSize = 20.000
+ToolTemplate.Parent = ScrollingFrame
+ToolTemplate.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+ToolTemplate.BorderSizePixel = 0
+ToolTemplate.Size = UDim2.new(0, 250, 0, 30)
+ToolTemplate.Font = Enum.Font.SourceSansBold
+ToolTemplate.TextColor3 = Color3.fromRGB(0, 0, 0)
+ToolTemplate.TextSize = 18.000
+ToolTemplate.Visible = false
 
--- Scripts:
+SelectedToolFrame.Parent = Frame
+SelectedToolFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+SelectedToolFrame.BorderSizePixel = 0
+SelectedToolFrame.Position = UDim2.new(0.05, 0, 0.8, 0)
+SelectedToolFrame.Size = UDim2.new(0, 270, 0, 50)
 
-local function isBehindWall(target, player)
-    local ray = Ray.new(player.Character.HumanoidRootPart.Position, (target.HumanoidRootPart.Position - player.Character.HumanoidRootPart.Position).Unit * 100)
-    local hit, position = workspace:FindPartOnRay(ray, player.Character)
-    return hit and hit:IsDescendantOf(target.Character)
-end
+SelectedToolLabel.Parent = SelectedToolFrame
+SelectedToolLabel.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+SelectedToolLabel.BackgroundTransparency = 1.000
+SelectedToolLabel.BorderSizePixel = 0
+SelectedToolLabel.Size = UDim2.new(1, 0, 1, 0)
+SelectedToolLabel.Font = Enum.Font.SourceSansBold
+SelectedToolLabel.Text = "___________"
+SelectedToolLabel.TextColor3 = Color3.fromRGB(0, 0, 0)
+SelectedToolLabel.TextSize = 20.000
 
-local function autoDetectScript()
-    local player = game.Players.LocalPlayer
-    local camera = workspace.CurrentCamera
-    local systemEnabled = false
+PickButton.Parent = Frame
+PickButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+PickButton.BorderSizePixel = 0
+PickButton.Position = UDim2.new(0.05, 0, 0.9, 0)
+PickButton.Size = UDim2.new(0, 270, 0, 30)
+PickButton.Font = Enum.Font.SourceSansBold
+PickButton.Text = "Pegar"
+PickButton.TextColor3 = Color3.fromRGB(0, 0, 0)
+PickButton.TextSize = 20.000
 
-    ToggleButton.MouseButton1Click:Connect(function()
-        systemEnabled = not systemEnabled
-        ToggleButton.Text = systemEnabled and "DESLIGAR" or "LIGAR"
-        ToggleButton.TextColor3 = systemEnabled and Color3.fromRGB(255, 0, 0) or Color3.fromRGB(0, 0, 0)
-    end)
+-- Função para listar as Tools
+local function listTools()
+    for _, tool in pairs(workspace:GetChildren()) do
+        if tool:IsA("Tool") then
+            local toolButton = ToolTemplate:Clone()
+            toolButton.Text = tool.Name
+            toolButton.Visible = true
+            toolButton.Parent = ScrollingFrame
 
-    while true do
-        if systemEnabled then
-            local closestPlayer = nil
-            local closestDistance = math.huge
-
-            for _, otherPlayer in pairs(game.Players:GetPlayers()) do
-                if otherPlayer ~= player and otherPlayer.Character and otherPlayer.Character:FindFirstChild("HumanoidRootPart") then
-                    local distance = (otherPlayer.Character.HumanoidRootPart.Position - player.Character.HumanoidRootPart.Position).Magnitude
-                    if distance < closestDistance and not isBehindWall(otherPlayer, player) then
-                        closestDistance = distance
-                        closestPlayer = otherPlayer
-                    end
-                end
-            end
-
-            if closestPlayer then
-                local targetPosition = closestPlayer.Character.HumanoidRootPart.Position
-
-                -- Entra em primeira pessoa e encara o inimigo
-                camera.CameraType = Enum.CameraType.Scriptable
-                camera.CFrame = CFrame.new(camera.CFrame.Position, targetPosition)
-
-                -- Atira após 0.5 segundos
-                task.wait(0.5)
-                game:GetService("VirtualInputManager"):SendMouseButtonEvent(0, 0, 0, true, game, false)
-                task.wait(0.1)
-                game:GetService("VirtualInputManager"):SendMouseButtonEvent(0, 0, 0, false, game, false)
-
-                -- Volta ao normal
-                camera.CameraType = Enum.CameraType.Custom
-            end
+            toolButton.MouseButton1Click:Connect(function()
+                SelectedToolLabel.Text = tool.Name
+            end)
         end
-        task.wait()
     end
+
+    -- Ajusta o tamanho do Canvas para rolar
+    ScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, #ScrollingFrame:GetChildren() * 35)
 end
 
-coroutine.wrap(autoDetectScript)()
+-- Função para pegar a Tool selecionada
+PickButton.MouseButton1Click:Connect(function()
+    local selectedToolName = SelectedToolLabel.Text
+    if selectedToolName ~= "___________" then
+        local tool = workspace:FindFirstChild(selectedToolName)
+        if tool and tool:IsA("Tool") then
+            tool:Clone().Parent = game.Players.LocalPlayer.Backpack
+        end
+    end
+end)
+
+-- Inicializa a lista de Tools
+listTools()

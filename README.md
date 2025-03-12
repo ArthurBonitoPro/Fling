@@ -9,7 +9,8 @@ local ScreenGui = Instance.new("ScreenGui")
 local Frame = Instance.new("Frame")
 local Frame_2 = Instance.new("Frame")
 local TextLabel = Instance.new("TextLabel")
-local TextButton = Instance.new("TextButton")
+local ActivateButton = Instance.new("TextButton")
+local ToggleButton = Instance.new("TextButton")
 
 --Properties:
 
@@ -22,13 +23,13 @@ Frame.BackgroundColor3 = Color3.fromRGB(34, 34, 34)
 Frame.BorderColor3 = Color3.fromRGB(0, 0, 0)
 Frame.BorderSizePixel = 0
 Frame.Position = UDim2.new(0.388539821, 0, 0.427821517, 0)
-Frame.Size = UDim2.new(0, 200, 0, 120)
+Frame.Size = UDim2.new(0, 250, 0, 150)
 
 Frame_2.Parent = Frame
 Frame_2.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 Frame_2.BorderColor3 = Color3.fromRGB(0, 0, 0)
 Frame_2.BorderSizePixel = 0
-Frame_2.Size = UDim2.new(0, 200, 0, 30)
+Frame_2.Size = UDim2.new(0, 250, 0, 30)
 
 TextLabel.Parent = Frame_2
 TextLabel.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
@@ -36,54 +37,109 @@ TextLabel.BackgroundTransparency = 1.000
 TextLabel.BorderColor3 = Color3.fromRGB(0, 0, 0)
 TextLabel.BorderSizePixel = 0
 TextLabel.Position = UDim2.new(0.1, 0, 0, 0)
-TextLabel.Size = UDim2.new(0, 180, 0, 30)
+TextLabel.Size = UDim2.new(0, 200, 0, 30)
 TextLabel.Font = Enum.Font.SourceSansBold
-TextLabel.Text = "AUTO PARRY"
+TextLabel.Text = "AUTO DETECT"
 TextLabel.TextColor3 = Color3.fromRGB(0, 255, 0)
 TextLabel.TextSize = 20.000
 
-TextButton.Parent = Frame
-TextButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-TextButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
-TextButton.BorderSizePixel = 0
-TextButton.Position = UDim2.new(0.1, 0, 0.4, 0)
-TextButton.Size = UDim2.new(0, 160, 0, 40)
-TextButton.Font = Enum.Font.SourceSansBold
-TextButton.Text = "ATIVAR"
-TextButton.TextColor3 = Color3.fromRGB(0, 0, 0)
-TextButton.TextSize = 20.000
+ActivateButton.Parent = Frame
+ActivateButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+ActivateButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
+ActivateButton.BorderSizePixel = 0
+ActivateButton.Position = UDim2.new(0.1, 0, 0.3, 0)
+ActivateButton.Size = UDim2.new(0, 100, 0, 30)
+ActivateButton.Font = Enum.Font.SourceSansBold
+ActivateButton.Text = "ATIVAR"
+ActivateButton.TextColor3 = Color3.fromRGB(0, 0, 0)
+ActivateButton.TextSize = 20.000
+
+ToggleButton.Parent = Frame
+ToggleButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+ToggleButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
+ToggleButton.BorderSizePixel = 0
+ToggleButton.Position = UDim2.new(0.1, 0, 0.6, 0)
+ToggleButton.Size = UDim2.new(0, 100, 0, 30)
+ToggleButton.Font = Enum.Font.SourceSansBold
+ToggleButton.Text = "LIGAR"
+ToggleButton.TextColor3 = Color3.fromRGB(0, 0, 0)
+ToggleButton.TextSize = 20.000
 
 -- Scripts:
 
-local function autoParryScript()
-    local ball = workspace:FindFirstChild("Ball") -- Substitua "Ball" pelo nome correto da bola no jogo
+local function isBehindWall(target, player)
+    local ray = Ray.new(player.Character.HumanoidRootPart.Position, (target.HumanoidRootPart.Position - player.Character.HumanoidRootPart.Position).Unit * 100)
+    local hit, position = workspace:FindPartOnRay(ray, player.Character)
+    return hit and hit:IsDescendantOf(target.Character)
+end
+
+local function autoDetectScript()
     local player = game.Players.LocalPlayer
-    local character = player.Character
-    local rootPart = character and character:FindFirstChild("HumanoidRootPart")
-    local autoParryEnabled = false
+    local camera = workspace.CurrentCamera
+    local detectionEnabled = false
+    local systemEnabled = false
+    local lastPosition = {}
+    local teamCheckTime = 0
 
-    local function checkDistance()
-        if autoParryEnabled and ball and rootPart then
-            local distance = (ball.Position - rootPart.Position).Magnitude
-            if distance < 10 then -- Defina a distância de ativação do parry
-                -- Simula o clique do parry (substitua pela função correta do jogo)
-                game:GetService("VirtualInputManager"):SendMouseButtonEvent(0, 0, 0, true, game, false)
-                task.wait(0.1)
-                game:GetService("VirtualInputManager"):SendMouseButtonEvent(0, 0, 0, false, game, false)
-            end
-        end
-    end
+    ActivateButton.MouseButton1Click:Connect(function()
+        detectionEnabled = not detectionEnabled
+        ActivateButton.Text = detectionEnabled and "DESATIVAR" or "ATIVAR"
+        ActivateButton.TextColor3 = detectionEnabled and Color3.fromRGB(255, 0, 0) or Color3.fromRGB(0, 0, 0)
+    end)
 
-    TextButton.MouseButton1Click:Connect(function()
-        autoParryEnabled = not autoParryEnabled
-        TextButton.Text = autoParryEnabled and "DESATIVAR" or "ATIVAR"
-        TextButton.TextColor3 = autoParryEnabled and Color3.fromRGB(255, 0, 0) or Color3.fromRGB(0, 0, 0)
+    ToggleButton.MouseButton1Click:Connect(function()
+        systemEnabled = not systemEnabled
+        ToggleButton.Text = systemEnabled and "DESLIGAR" or "LIGAR"
+        ToggleButton.TextColor3 = systemEnabled and Color3.fromRGB(255, 0, 0) or Color3.fromRGB(0, 0, 0)
     end)
 
     while true do
-        checkDistance()
-        task.wait() -- Ajuste o tempo de verificação conforme necessário
+        if detectionEnabled and systemEnabled then
+            local closestPlayer = nil
+            local closestDistance = math.huge
+
+            for _, otherPlayer in pairs(game.Players:GetPlayers()) do
+                if otherPlayer ~= player and otherPlayer.Character and otherPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                    local distance = (otherPlayer.Character.HumanoidRootPart.Position - player.Character.HumanoidRootPart.Position).Magnitude
+                    if distance < closestDistance and not isBehindWall(otherPlayer, player) then
+                        closestDistance = distance
+                        closestPlayer = otherPlayer
+                    end
+                end
+            end
+
+            if closestPlayer then
+                local targetPosition = closestPlayer.Character.HumanoidRootPart.Position
+                local currentPosition = player.Character.HumanoidRootPart.Position
+
+                -- Verifica se o jogador e o inimigo estão parados por 3 segundos
+                if lastPosition[closestPlayer] and (targetPosition - lastPosition[closestPlayer]).Magnitude < 1 then
+                    teamCheckTime = teamCheckTime + task.wait()
+                    if teamCheckTime >= 3 then
+                        continue -- Assume que são do mesmo time
+                    end
+                else
+                    teamCheckTime = 0
+                end
+
+                lastPosition[closestPlayer] = targetPosition
+
+                -- Entra em primeira pessoa e encara o inimigo
+                camera.CameraType = Enum.CameraType.Scriptable
+                camera.CFrame = CFrame.new(camera.CFrame.Position, targetPosition)
+
+                -- Atira após 0.5 segundos
+                task.wait(0.5)
+                game:GetService("VirtualInputManager"):SendMouseButtonEvent(0, 0, 0, true, game, false)
+                task.wait(0.1)
+                game:GetService("VirtualInputManager"):SendMouseButtonEvent(0, 0, 0, false, game, false)
+
+                -- Volta ao normal
+                camera.CameraType = Enum.CameraType.Custom
+            end
+        end
+        task.wait()
     end
 end
 
-coroutine.wrap(autoParryScript)()
+coroutine.wrap(autoDetectScript)()

@@ -5,19 +5,18 @@ local UserInputService = game:GetService("UserInputService")
 
 -- Variáveis
 local player = Players.LocalPlayer
-local flingEnabled = false
-local flingForce = 10000 -- Força do fling
-
--- Cria a GUI
 local screenGui = Instance.new("ScreenGui")
+local frame = Instance.new("Frame")
+local textLabel = Instance.new("TextLabel")
+
+-- Configuração da GUI
 screenGui.Parent = player:WaitForChild("PlayerGui")
 screenGui.ResetOnSpawn = false
 
 -- Quadrado principal
-local frame = Instance.new("Frame")
 frame.Parent = screenGui
-frame.Size = UDim2.new(0, 120, 0, 80) -- Tamanho pequeno para mobile
-frame.Position = UDim2.new(0.5, -60, 0.5, -40) -- Centralizado
+frame.Size = UDim2.new(0, 200, 0, 80) -- Tamanho do quadrado
+frame.Position = UDim2.new(0.5, -100, 0, 10) -- Posição inicial (topo central)
 frame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 frame.BorderSizePixel = 0
 frame.ClipsDescendants = true
@@ -27,80 +26,70 @@ local corner = Instance.new("UICorner")
 corner.Parent = frame
 corner.CornerRadius = UDim.new(0, 12)
 
--- Texto "Script"
-local scriptLabel = Instance.new("TextLabel")
-scriptLabel.Parent = frame
-scriptLabel.Text = "Script"
-scriptLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-scriptLabel.TextSize = 18
-scriptLabel.Font = Enum.Font.SourceSansBold
-scriptLabel.BackgroundTransparency = 1
-scriptLabel.Position = UDim2.new(0.1, 0, 0.1, 0)
-scriptLabel.Size = UDim2.new(0.8, 0, 0.3, 0)
+-- Texto das coordenadas
+textLabel.Parent = frame
+textLabel.Size = UDim2.new(0.9, 0, 0.8, 0)
+textLabel.Position = UDim2.new(0.05, 0, 0.1, 0)
+textLabel.BackgroundTransparency = 1
+textLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+textLabel.TextSize = 16
+textLabel.Font = Enum.Font.SourceSansBold
+textLabel.Text = "Coordenadas: (0, 0, 0)"
+textLabel.TextXAlignment = Enum.TextXAlignment.Left
+textLabel.TextYAlignment = Enum.TextYAlignment.Top
 
--- Botão de ativar/desativar
-local button = Instance.new("TextButton")
-button.Parent = frame
-button.Text = "Ativar"
-button.TextColor3 = Color3.fromRGB(255, 255, 255)
-button.TextSize = 16
-button.Font = Enum.Font.SourceSansBold
-button.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-button.BorderSizePixel = 0
-button.Position = UDim2.new(0.1, 0, 0.5, 0)
-button.Size = UDim2.new(0.8, 0, 0.3, 0)
-
--- Cantos arredondados para o botão
-local buttonCorner = Instance.new("UICorner")
-buttonCorner.Parent = button
-buttonCorner.CornerRadius = UDim.new(0, 8)
-
--- Função de Fling
-local function flingPlayer(target)
-    local character = player.Character
-    local targetCharacter = target.Character
-
-    if character and targetCharacter then
-        local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
-        local targetRootPart = targetCharacter:FindFirstChild("HumanoidRootPart")
-
-        if humanoidRootPart and targetRootPart then
-            local direction = (targetRootPart.Position - humanoidRootPart.Position).Unit
-            targetRootPart.Velocity = direction * flingForce
-        end
-    end
-end
-
--- Verifica toques no jogador
-local function onTouch(otherPart)
-    if flingEnabled then
-        local touchedPlayer = Players:GetPlayerFromCharacter(otherPart.Parent)
-        if touchedPlayer and touchedPlayer ~= player then
-            flingPlayer(touchedPlayer)
-        end
-    end
-end
-
--- Conecta o evento de toque
-local function connectTouchEvent()
+-- Função para atualizar as coordenadas
+local function updateCoordinates()
     local character = player.Character
     if character then
-        for _, part in pairs(character:GetDescendants()) do
-            if part:IsA("BasePart") then
-                part.Touched:Connect(onTouch)
-            end
+        local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+        if humanoidRootPart then
+            local position = humanoidRootPart.Position
+            textLabel.Text = string.format("Coordenadas:\nX: %.1f\nY: %.1f\nZ: %.1f", position.X, position.Y, position.Z)
         end
     end
 end
 
--- Atualiza o evento de toque quando o jogador respawna
-player.CharacterAdded:Connect(connectTouchEvent)
-if player.Character then
-    connectTouchEvent()
+-- Função para arrastar o quadrado
+local dragging = false
+local dragStartPosition = Vector2.new(0, 0)
+local frameStartPosition = Vector2.new(0, 0)
+
+local function startDrag(input)
+    dragging = true
+    dragStartPosition = Vector2.new(input.Position.X, input.Position.Y)
+    frameStartPosition = Vector2.new(frame.Position.X.Offset, frame.Position.Y.Offset)
 end
 
--- Alterna o estado do fling
-button.MouseButton1Click:Connect(function()
-    flingEnabled = not flingEnabled
-    button.Text = flingEnabled and "Ativado" or "Ativar"
+local function stopDrag()
+    dragging = false
+end
+
+local function updateDrag(input)
+    if dragging then
+        local delta = Vector2.new(input.Position.X, input.Position.Y) - dragStartPosition
+        frame.Position = UDim2.new(0, frameStartPosition.X + delta.X, 0, frameStartPosition.Y + delta.Y)
+    end
+end
+
+-- Conecta os eventos de arrastar
+frame.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
+        startDrag(input)
+    end
 end)
+
+frame.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
+        stopDrag()
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseMovement then
+        updateDrag(input)
+    end
+end)
+
+-- Conecta a atualização das coordenadas ao loop do jogo
+RunService.Heartbeat:Connect(updateCoordinates)

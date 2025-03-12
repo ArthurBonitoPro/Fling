@@ -9,7 +9,6 @@ local ScreenGui = Instance.new("ScreenGui")
 local Frame = Instance.new("Frame")
 local Frame_2 = Instance.new("Frame")
 local TextLabel = Instance.new("TextLabel")
-local ActivateButton = Instance.new("TextButton")
 local ToggleButton = Instance.new("TextButton")
 
 --Properties:
@@ -23,7 +22,7 @@ Frame.BackgroundColor3 = Color3.fromRGB(34, 34, 34)
 Frame.BorderColor3 = Color3.fromRGB(0, 0, 0)
 Frame.BorderSizePixel = 0
 Frame.Position = UDim2.new(0.388539821, 0, 0.427821517, 0)
-Frame.Size = UDim2.new(0, 250, 0, 150)
+Frame.Size = UDim2.new(0, 250, 0, 100)
 
 Frame_2.Parent = Frame
 Frame_2.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
@@ -43,22 +42,11 @@ TextLabel.Text = "AUTO DETECT"
 TextLabel.TextColor3 = Color3.fromRGB(0, 255, 0)
 TextLabel.TextSize = 20.000
 
-ActivateButton.Parent = Frame
-ActivateButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-ActivateButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
-ActivateButton.BorderSizePixel = 0
-ActivateButton.Position = UDim2.new(0.1, 0, 0.3, 0)
-ActivateButton.Size = UDim2.new(0, 100, 0, 30)
-ActivateButton.Font = Enum.Font.SourceSansBold
-ActivateButton.Text = "ATIVAR"
-ActivateButton.TextColor3 = Color3.fromRGB(0, 0, 0)
-ActivateButton.TextSize = 20.000
-
 ToggleButton.Parent = Frame
 ToggleButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 ToggleButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
 ToggleButton.BorderSizePixel = 0
-ToggleButton.Position = UDim2.new(0.1, 0, 0.6, 0)
+ToggleButton.Position = UDim2.new(0.1, 0, 0.4, 0)
 ToggleButton.Size = UDim2.new(0, 100, 0, 30)
 ToggleButton.Font = Enum.Font.SourceSansBold
 ToggleButton.Text = "LIGAR"
@@ -76,16 +64,7 @@ end
 local function autoDetectScript()
     local player = game.Players.LocalPlayer
     local camera = workspace.CurrentCamera
-    local detectionEnabled = false
     local systemEnabled = false
-    local lastPosition = {}
-    local teamCheckTime = 0
-
-    ActivateButton.MouseButton1Click:Connect(function()
-        detectionEnabled = not detectionEnabled
-        ActivateButton.Text = detectionEnabled and "DESATIVAR" or "ATIVAR"
-        ActivateButton.TextColor3 = detectionEnabled and Color3.fromRGB(255, 0, 0) or Color3.fromRGB(0, 0, 0)
-    end)
 
     ToggleButton.MouseButton1Click:Connect(function()
         systemEnabled = not systemEnabled
@@ -94,7 +73,7 @@ local function autoDetectScript()
     end)
 
     while true do
-        if detectionEnabled and systemEnabled then
+        if systemEnabled then
             local closestPlayer = nil
             local closestDistance = math.huge
 
@@ -110,19 +89,6 @@ local function autoDetectScript()
 
             if closestPlayer then
                 local targetPosition = closestPlayer.Character.HumanoidRootPart.Position
-                local currentPosition = player.Character.HumanoidRootPart.Position
-
-                -- Verifica se o jogador e o inimigo estão parados por 3 segundos
-                if lastPosition[closestPlayer] and (targetPosition - lastPosition[closestPlayer]).Magnitude < 1 then
-                    teamCheckTime = teamCheckTime + task.wait()
-                    if teamCheckTime >= 3 then
-                        continue -- Assume que são do mesmo time
-                    end
-                else
-                    teamCheckTime = 0
-                end
-
-                lastPosition[closestPlayer] = targetPosition
 
                 -- Entra em primeira pessoa e encara o inimigo
                 camera.CameraType = Enum.CameraType.Scriptable

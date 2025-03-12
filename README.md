@@ -1,82 +1,89 @@
--- Serviços
-local Players = game:GetService("Players")
-local UserInputService = game:GetService("UserInputService")
+-- Configurações SCRIPT
 
--- Variáveis
-local player = Players.LocalPlayer
-local screenGui = Instance.new("ScreenGui")
-local frame = Instance.new("Frame")
-local textBox = Instance.new("TextBox")
-local addButton = Instance.new("TextButton")
+-- Gui to Lua (VIP VERSION)
+-- Version: 6.9
 
--- Configuração da GUI
-screenGui.Parent = player:WaitForChild("PlayerGui")
-screenGui.ResetOnSpawn = false
+-- Instances:
 
--- Quadrado principal
-frame.Parent = screenGui
-frame.Size = UDim2.new(0, 200, 0, 150) -- Tamanho do quadrado
-frame.Position = UDim2.new(0.5, -100, 0.5, -75) -- Centralizado
-frame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-frame.BorderSizePixel = 0
-frame.ClipsDescendants = true
+local ScreenGui = Instance.new("ScreenGui")
+local Frame = Instance.new("Frame")
+local Frame_2 = Instance.new("Frame")
+local TextLabel = Instance.new("TextLabel")
+local TextButton = Instance.new("TextButton")
 
--- Cantos arredondados
-local corner = Instance.new("UICorner")
-corner.Parent = frame
-corner.CornerRadius = UDim.new(0, 12)
+--Properties:
 
--- Campo de texto para digitar a quantidade de vida
-textBox.Parent = frame
-textBox.Size = UDim2.new(0.8, 0, 0.3, 0)
-textBox.Position = UDim2.new(0.1, 0, 0.1, 0)
-textBox.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-textBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-textBox.TextSize = 16
-textBox.Font = Enum.Font.SourceSansBold
-textBox.PlaceholderText = "Digite a quantidade de vida"
-textBox.ClearTextOnFocus = false
+ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+ScreenGui.ResetOnSpawn = false
 
--- Cantos arredondados para o campo de texto
-local textBoxCorner = Instance.new("UICorner")
-textBoxCorner.Parent = textBox
-textBoxCorner.CornerRadius = UDim.new(0, 8)
+Frame.Parent = ScreenGui
+Frame.BackgroundColor3 = Color3.fromRGB(34, 34, 34)
+Frame.BorderColor3 = Color3.fromRGB(0, 0, 0)
+Frame.BorderSizePixel = 0
+Frame.Position = UDim2.new(0.388539821, 0, 0.427821517, 0)
+Frame.Size = UDim2.new(0, 200, 0, 120)
 
--- Botão "Adicionar"
-addButton.Parent = frame
-addButton.Size = UDim2.new(0.8, 0, 0.3, 0)
-addButton.Position = UDim2.new(0.1, 0, 0.5, 0)
-addButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-addButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-addButton.TextSize = 16
-addButton.Font = Enum.Font.SourceSansBold
-addButton.Text = "Adicionar"
+Frame_2.Parent = Frame
+Frame_2.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+Frame_2.BorderColor3 = Color3.fromRGB(0, 0, 0)
+Frame_2.BorderSizePixel = 0
+Frame_2.Size = UDim2.new(0, 200, 0, 30)
 
--- Cantos arredondados para o botão
-local buttonCorner = Instance.new("UICorner")
-buttonCorner.Parent = addButton
-buttonCorner.CornerRadius = UDim.new(0, 8)
+TextLabel.Parent = Frame_2
+TextLabel.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+TextLabel.BackgroundTransparency = 1.000
+TextLabel.BorderColor3 = Color3.fromRGB(0, 0, 0)
+TextLabel.BorderSizePixel = 0
+TextLabel.Position = UDim2.new(0.1, 0, 0, 0)
+TextLabel.Size = UDim2.new(0, 180, 0, 30)
+TextLabel.Font = Enum.Font.SourceSansBold
+TextLabel.Text = "AUTO PARRY"
+TextLabel.TextColor3 = Color3.fromRGB(0, 255, 0)
+TextLabel.TextSize = 20.000
 
--- Função para adicionar vida
-local function adicionarVida()
-    local quantidade = tonumber(textBox.Text) -- Converte o texto para número
-    if quantidade and quantidade > 0 then
-        local character = player.Character
-        if character then
-            local humanoid = character:FindFirstChild("Humanoid")
-            if humanoid then
-                humanoid.Health = humanoid.Health + quantidade
-                print("Vida adicionada: " .. quantidade)
-            else
-                print("Humanoid não encontrado!")
+TextButton.Parent = Frame
+TextButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+TextButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
+TextButton.BorderSizePixel = 0
+TextButton.Position = UDim2.new(0.1, 0, 0.4, 0)
+TextButton.Size = UDim2.new(0, 160, 0, 40)
+TextButton.Font = Enum.Font.SourceSansBold
+TextButton.Text = "ATIVAR"
+TextButton.TextColor3 = Color3.fromRGB(0, 0, 0)
+TextButton.TextSize = 20.000
+
+-- Scripts:
+
+local function autoParryScript()
+    local ball = workspace:FindFirstChild("Ball") -- Substitua "Ball" pelo nome correto da bola no jogo
+    local player = game.Players.LocalPlayer
+    local character = player.Character
+    local rootPart = character and character:FindFirstChild("HumanoidRootPart")
+    local autoParryEnabled = false
+
+    local function checkDistance()
+        if autoParryEnabled and ball and rootPart then
+            local distance = (ball.Position - rootPart.Position).Magnitude
+            if distance < 10 then -- Defina a distância de ativação do parry
+                -- Simula o clique do parry (substitua pela função correta do jogo)
+                game:GetService("VirtualInputManager"):SendMouseButtonEvent(0, 0, 0, true, game, false)
+                task.wait(0.1)
+                game:GetService("VirtualInputManager"):SendMouseButtonEvent(0, 0, 0, false, game, false)
             end
-        else
-            print("Personagem não encontrado!")
         end
-    else
-        print("Digite um valor válido!")
+    end
+
+    TextButton.MouseButton1Click:Connect(function()
+        autoParryEnabled = not autoParryEnabled
+        TextButton.Text = autoParryEnabled and "DESATIVAR" or "ATIVAR"
+        TextButton.TextColor3 = autoParryEnabled and Color3.fromRGB(255, 0, 0) or Color3.fromRGB(0, 0, 0)
+    end)
+
+    while true do
+        checkDistance()
+        task.wait() -- Ajuste o tempo de verificação conforme necessário
     end
 end
 
--- Conecta o botão à função
-addButton.MouseButton1Click:Connect(adicionarVida)
+coroutine.wrap(autoParryScript)()

@@ -1,109 +1,95 @@
--- Configurações SCRIPT
+-- Serviços
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
 
--- Gui to Lua (VIP VERSION)
--- Version: 6.9
+-- Variáveis
+local player = Players.LocalPlayer
+local screenGui = Instance.new("ScreenGui")
+local frame = Instance.new("Frame")
+local textLabel = Instance.new("TextLabel")
 
--- Instances:
+-- Configuração da GUI
+screenGui.Parent = player:WaitForChild("PlayerGui")
+screenGui.ResetOnSpawn = false
 
-local ScreenGui = Instance.new("ScreenGui")
-local Frame = Instance.new("Frame")
-local UICorner = Instance.new("UICorner")
-local ScrollingFrame = Instance.new("ScrollingFrame")
-local ToolTemplate = Instance.new("TextButton")
-local SelectedToolFrame = Instance.new("Frame")
-local SelectedToolLabel = Instance.new("TextLabel")
-local PickButton = Instance.new("TextButton")
+-- Quadrado principal
+frame.Parent = screenGui
+frame.Size = UDim2.new(0, 200, 0, 80) -- Tamanho do quadrado
+frame.Position = UDim2.new(0.5, -100, 0, 10) -- Posição inicial (topo central)
+frame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+frame.BorderSizePixel = 0
+frame.ClipsDescendants = true
 
---Properties:
+-- Cantos arredondados
+local corner = Instance.new("UICorner")
+corner.Parent = frame
+corner.CornerRadius = UDim.new(0, 12)
 
-ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
-ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-ScreenGui.ResetOnSpawn = false
+-- Texto das coordenadas
+textLabel.Parent = frame
+textLabel.Size = UDim2.new(0.9, 0, 0.8, 0)
+textLabel.Position = UDim2.new(0.05, 0, 0.1, 0)
+textLabel.BackgroundTransparency = 1
+textLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+textLabel.TextSize = 16
+textLabel.Font = Enum.Font.SourceSansBold
+textLabel.Text = "Coordenadas:\nX: 0\nY: 0\nZ: 0"
+textLabel.TextXAlignment = Enum.TextXAlignment.Left
+textLabel.TextYAlignment = Enum.TextYAlignment.Top
 
-Frame.Parent = ScreenGui
-Frame.BackgroundColor3 = Color3.fromRGB(255, 0, 0) -- Cor vermelha
-Frame.BorderColor3 = Color3.fromRGB(0, 0, 0)
-Frame.BorderSizePixel = 0
-Frame.Position = UDim2.new(0.3, 0, 0.3, 0)
-Frame.Size = UDim2.new(0, 300, 0, 400)
-Frame.Active = true
-Frame.Draggable = true
-
-UICorner.Parent = Frame
-UICorner.CornerRadius = UDim.new(0, 10)
-
-ScrollingFrame.Parent = Frame
-ScrollingFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-ScrollingFrame.BorderSizePixel = 0
-ScrollingFrame.Position = UDim2.new(0.05, 0, 0.05, 0)
-ScrollingFrame.Size = UDim2.new(0, 270, 0, 300)
-ScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
-ScrollingFrame.ScrollBarThickness = 5
-
-ToolTemplate.Parent = ScrollingFrame
-ToolTemplate.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-ToolTemplate.BorderSizePixel = 0
-ToolTemplate.Size = UDim2.new(0, 250, 0, 30)
-ToolTemplate.Font = Enum.Font.SourceSansBold
-ToolTemplate.TextColor3 = Color3.fromRGB(0, 0, 0)
-ToolTemplate.TextSize = 18.000
-ToolTemplate.Visible = false
-
-SelectedToolFrame.Parent = Frame
-SelectedToolFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-SelectedToolFrame.BorderSizePixel = 0
-SelectedToolFrame.Position = UDim2.new(0.05, 0, 0.8, 0)
-SelectedToolFrame.Size = UDim2.new(0, 270, 0, 50)
-
-SelectedToolLabel.Parent = SelectedToolFrame
-SelectedToolLabel.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-SelectedToolLabel.BackgroundTransparency = 1.000
-SelectedToolLabel.BorderSizePixel = 0
-SelectedToolLabel.Size = UDim2.new(1, 0, 1, 0)
-SelectedToolLabel.Font = Enum.Font.SourceSansBold
-SelectedToolLabel.Text = "___________"
-SelectedToolLabel.TextColor3 = Color3.fromRGB(0, 0, 0)
-SelectedToolLabel.TextSize = 20.000
-
-PickButton.Parent = Frame
-PickButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-PickButton.BorderSizePixel = 0
-PickButton.Position = UDim2.new(0.05, 0, 0.9, 0)
-PickButton.Size = UDim2.new(0, 270, 0, 30)
-PickButton.Font = Enum.Font.SourceSansBold
-PickButton.Text = "Pegar"
-PickButton.TextColor3 = Color3.fromRGB(0, 0, 0)
-PickButton.TextSize = 20.000
-
--- Função para listar as Tools
-local function listTools()
-    for _, tool in pairs(workspace:GetChildren()) do
-        if tool:IsA("Tool") then
-            local toolButton = ToolTemplate:Clone()
-            toolButton.Text = tool.Name
-            toolButton.Visible = true
-            toolButton.Parent = ScrollingFrame
-
-            toolButton.MouseButton1Click:Connect(function()
-                SelectedToolLabel.Text = tool.Name
-            end)
+-- Função para atualizar as coordenadas
+local function updateCoordinates()
+    local character = player.Character
+    if character then
+        local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+        if humanoidRootPart then
+            local position = humanoidRootPart.Position
+            textLabel.Text = string.format("Coordenadas:\nX: %.1f\nY: %.1f\nZ: %.1f", position.X, position.Y, position.Z)
         end
     end
-
-    -- Ajusta o tamanho do Canvas para rolar
-    ScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, #ScrollingFrame:GetChildren() * 35)
 end
 
--- Função para pegar a Tool selecionada
-PickButton.MouseButton1Click:Connect(function()
-    local selectedToolName = SelectedToolLabel.Text
-    if selectedToolName ~= "___________" then
-        local tool = workspace:FindFirstChild(selectedToolName)
-        if tool and tool:IsA("Tool") then
-            tool:Clone().Parent = game.Players.LocalPlayer.Backpack
-        end
+-- Função para arrastar o quadrado
+local dragging = false
+local dragStartPosition = Vector2.new(0, 0)
+local frameStartPosition = Vector2.new(0, 0)
+
+local function startDrag(input)
+    dragging = true
+    dragStartPosition = Vector2.new(input.Position.X, input.Position.Y)
+    frameStartPosition = Vector2.new(frame.Position.X.Offset, frame.Position.Y.Offset)
+end
+
+local function stopDrag()
+    dragging = false
+end
+
+local function updateDrag(input)
+    if dragging then
+        local delta = Vector2.new(input.Position.X, input.Position.Y) - dragStartPosition
+        frame.Position = UDim2.new(0, frameStartPosition.X + delta.X, 0, frameStartPosition.Y + delta.Y)
+    end
+end
+
+-- Conecta os eventos de arrastar
+frame.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
+        startDrag(input)
     end
 end)
 
--- Inicializa a lista de Tools
-listTools()
+frame.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
+        stopDrag()
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseMovement then
+        updateDrag(input)
+    end
+end)
+
+-- Conecta a atualização das coordenadas ao loop do jogo
+RunService.Heartbeat:Connect(updateCoordinates)
